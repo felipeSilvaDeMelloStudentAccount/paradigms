@@ -47,5 +47,5 @@ country(paris,france).
 country(newyork,usa).
 country(chicago,usa).
 
-%list_airport(X,Y):- country(X,Y).
-list_airport(Country,Y):- findall(Z, country(Z,Country), Y).
+
+list_airport(Country, Airports) :- findall(Airport, country(Airport, Country), Airports).
