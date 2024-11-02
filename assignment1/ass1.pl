@@ -47,5 +47,8 @@ country(paris,france).
 country(newyork,usa).
 country(chicago,usa).
 
-
+%findall is taking three arguments there Airport, country(Airport, Country), Airports)
+% Airport is representing each result of the recursion
+% country(Airport, Country) is the query that we want to find all the solutions.
+% Airports is the list that will hold all the solutions that match the the query.
 list_airport(Country, Airports) :- findall(Airport, country(Airport, Country), Airports).
