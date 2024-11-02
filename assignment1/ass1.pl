@@ -52,3 +52,12 @@ country(chicago,usa).
 % country(Airport, Country) is the query that we want to find all the solutions.
 % Airports is the list that will hold all the solutions that match the the query.
 list_airport(Country, Airports) :- findall(Airport, country(Airport, Country), Airports).
+
+% Get all the outgoing flights
+fromConnections(City, Connections) :- findall(Connection, flight(City, Connection,_,_,_,_), Connections).
+% Get all the incoming flights
+toConnections(City, Connections) :- findall(Connection, flight(Connection,City,_,_,_,_), Connections).
+% Get all outgoing and incoming flights
+connections(City, Connections) :- fromConnections(City,FromConnections), toConnections(City, ToConnections), append(FromConnections, ToConnections, Connections).
+trip(FromCity,ToCity, Connections) :- connections(FromCity, FConnections), connections(ToCity, CConnections), findall(FConnections, CConnections,Connections).
+#trip(FromCity,ToCity,Connection) :- flight(FromCity, ToCity,X,Y,Z).
