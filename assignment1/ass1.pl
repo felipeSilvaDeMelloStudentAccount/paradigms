@@ -1,3 +1,4 @@
+%flight (FromCity, ToCity, Airline, Distance, Duration,Cost)
 flight(london,dublin,aerlingus,500,45,150).
 flight(rome,london,ba,1500,150,400).
 flight(rome,paris,airfrance,1200,120,500).
@@ -59,5 +60,15 @@ fromConnections(City, Connections) :- findall(Connection, flight(City, Connectio
 toConnections(City, Connections) :- findall(Connection, flight(Connection,City,_,_,_,_), Connections).
 % Get all outgoing and incoming flights
 connections(City, Connections) :- fromConnections(City,FromConnections), toConnections(City, ToConnections), append(FromConnections, ToConnections, Connections).
-trip(FromCity,ToCity, Connections) :- connections(FromCity, FConnections), connections(ToCity, CConnections), findall(FConnections, CConnections,Connections).
-#trip(FromCity,ToCity,Connection) :- flight(FromCity, ToCity,X,Y,Z).
+
+% Direct connection between two cities.
+trip(City1, City2) :- flight(City1, City2, _, _, _, _).
+
+% Build the path between two cities.
+trip(FromCity, ToCity, Visited, [FromCity, ConnectionCity, ToCity]) :-
+    trip(FromCity, ConnectionCity),
+    ConnectionCity \= ToCity, \+ member(ConnectionCity, Visited),
+    trip(ConnectionCity, ToCity).
+
+% Main predicate to find paths from FromCity to ToCity.
+trip(FromCity, ToCity, Path) :-   trip(FromCity, ToCity, [FromCity], Path).
