@@ -105,3 +105,20 @@ trip_dist([FromCity, ToCity | NextCity], Distance) :-
 trip_dist(FromCity, ToCity, [Path, Distance]) :-
     trip(FromCity, ToCity, Path),
     trip_dist(Path, Distance).
+
+% Task 1.5
+% Cost of a direct flight.
+direct_cost(FromCity, ToCity, Cost) :-
+    flight(FromCity, ToCity, _, _, Cost, _).
+
+% Cost of a path.
+trip_cost([_], 0).
+trip_cost([FromCity, ToCity | NextCity], Cost) :-
+    direct_cost(FromCity, ToCity, C1),
+    trip_cost([ToCity | NextCity], CNextCity),
+    Cost is C1 + CNextCity.
+
+% Total cost for a trip from city to city.
+trip_cost(FromCity, ToCity, [Path, Cost]) :-
+    trip(FromCity, ToCity, Path),
+    trip_cost(Path, Cost).
