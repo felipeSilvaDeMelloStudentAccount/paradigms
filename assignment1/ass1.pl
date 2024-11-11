@@ -140,8 +140,8 @@ trip_change(FromCity, ToCity, [Path, Changes]) :-
 % Get all trips from city to city, that does not contain the specified Airline.
 all_trip_noairline([_], _) :- false.
 all_trip_noairline([FromCity, ToCity | Rest], Airline) :-
-    flight(FromCity, ToCity, Airline, _, _, _), !;  % If this leg is operated by Airline, succeed.
-    all_trip_noairline([ToCity | Rest], Airline).  % Otherwise, check the rest of the path.
+    flight(FromCity, ToCity, Airline, _, _, _), !;  % If contains Airline, succeed.
+    all_trip_noairline([ToCity | Rest], Airline).  % else continue checking.
 
 % Get all trips from city to city, that does not contain the specified Airline.
 all_trip_noairline(FromCity, ToCity, Airline, Result) :-
