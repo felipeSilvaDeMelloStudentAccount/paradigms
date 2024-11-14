@@ -192,10 +192,10 @@ fastest(FromCity, ToCity, Trip, Duration) :-
     findall([Path, TripDuration], trip_time(FromCity, ToCity, [Path, TripDuration]), Trips),
     min_trip(Trips, [Trip, Duration]).
 
+% Task 1.9
 
-
-
-
-
-
-
+% Get all connections from airport X to country Y.
+trip_to_nation(FromCity, Country, Trip) :-
+    list_airport(Country, Airports),
+    member(ToCity, Airports),
+    trip(FromCity, ToCity, Trip).
