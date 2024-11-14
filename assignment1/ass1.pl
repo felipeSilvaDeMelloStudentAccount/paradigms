@@ -138,18 +138,61 @@ trip_change(FromCity, ToCity, [Path, Changes]) :-
 
 % Task 1.7 
 % Get all trips from city to city, that does not contain the specified Airline.
-all_trip_noairline([_], _) :- false.
-all_trip_noairline([FromCity, ToCity | Rest], Airline) :-
-    flight(FromCity, ToCity, Airline, _, _, _), !;  % If contains Airline, succeed.
-    all_trip_noairline([ToCity | Rest], Airline).  % else continue checking.
+path_contains_airline([_], _) :- false.
+path_contains_airline([FromCity, ToCity | Rest], Airline) :-
+    flight(FromCity, ToCity, Airline, _, _, _), !;  % Check if the flight is found.
+    path_contains_airline([ToCity | Rest], Airline).  % continue checking.
 
-% Get all trips from city to city, that does not contain the specified Airline.
+% Main - Find all trips from city to City, removing the specified Airline.
 all_trip_noairline(FromCity, ToCity, Airline, Result) :-
     findall(
         Path,
-        (trip(FromCity, ToCity, Path), \+ all_trip_noairline(Path, Airline)),
+        (trip(FromCity, ToCity, Path), \+ path_contains_airline(Path, Airline)),
         Result
     ).
+
+% Task 1.8
+
+% Trip Duration
+% Get the duration of a direct flight.
+direct_time(FromCity, ToCity, Duration) :-
+    flight(FromCity, ToCity, _, _, Duration, _).
+
+% Calculate the total duration for a path.
+trip_time([_], 0).
+trip_time([FromCity, ToCity | NextCity], TotalTime) :-
+    direct_time(FromCity, ToCity, T1),
+    trip_time([ToCity | NextCity], TNext),
+    TotalTime is T1 + TNext.
+
+% Total duration for a trip from city to city.
+trip_time(FromCity, ToCity, [Path, TotalTime]) :-
+    trip(FromCity, ToCity, Path),
+    trip_time(Path, TotalTime).
+
+% Minimum value in a list
+min_trip([TripValue], TripValue).
+min_trip([[Trip1, Value1], [Trip2, Value2] | Rest], MinTrip) :-
+    (Value1 =< Value2 -> min_trip([[Trip1, Value1] | Rest], MinTrip)
+    ; min_trip([[Trip2, Value2] | Rest], MinTrip)).
+
+% Cheapest trip from city to city.
+cheapest(FromCity, ToCity, Trip, Cost) :-
+    findall([Path, TripCost], trip_cost(FromCity, ToCity, [Path, TripCost]), Trips),
+    min_trip(Trips, [Trip, Cost]).
+
+% Shortest trip from city to city.
+shortest(FromCity, ToCity, Trip, Distance) :-
+    findall([Path, TripDistance], trip_dist(FromCity, ToCity, [Path, TripDistance]), Trips),
+    min_trip(Trips, [Trip, Distance]).
+
+
+% Fastest trip from city to city.
+fastest(FromCity, ToCity, Trip, Duration) :-
+    findall([Path, TripDuration], trip_time(FromCity, ToCity, [Path, TripDuration]), Trips),
+    min_trip(Trips, [Trip, Duration]).
+
+
 
 
 
