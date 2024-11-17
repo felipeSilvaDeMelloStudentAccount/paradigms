@@ -58,10 +58,12 @@ list_airport(Country, Airports) :-
 
 % Get all the outgoing flights
 fromConnections(City, Connections) :-
-    findall(Connection, flight(City, Connection,_,_,_,_), Connections).
+    findall(Connection, flight(City, Connection,_,_,_,_),
+    Connections).
 % Get all the incoming flights
 toConnections(City, Connections) :-
-    findall(Connection, flight(Connection,City,_,_,_,_), Connections).
+    findall(Connection, flight(Connection,City,_,_,_,_),
+    Connections).
 % Get all outgoing and incoming flights
 connections(City, Connections) :-
     fromConnections(City,FromConnections),
@@ -147,12 +149,15 @@ path_contains_airline([FromCity, ToCity | Rest], Airline) :-
 all_trip_noairline(FromCity, ToCity, Airline, Result) :-
     findall(
         Path,
-        (trip(FromCity, ToCity, Path), \+ path_contains_airline(Path, Airline)),
+        (
+            trip(FromCity, ToCity, Path),
+            \+
+            path_contains_airline(Path, Airline)
+        ),
         Result
     ).
 
 % Task 1.8
-
 % Trip Duration
 % Get the duration of a direct flight.
 direct_time(FromCity, ToCity, Duration) :-
@@ -174,28 +179,50 @@ trip_time(FromCity, ToCity, [Path, TotalTime]) :-
 min_trip([TripValue], TripValue).
 min_trip([[Trip1, Value1], [Trip2, Value2] | Rest], MinTrip) :-
     (Value1 =< Value2 -> min_trip([[Trip1, Value1] | Rest], MinTrip)
-    ; min_trip([[Trip2, Value2] | Rest], MinTrip)).
+    ;
+    min_trip([[Trip2, Value2] | Rest], MinTrip)).
 
 % Cheapest trip from city to city.
 cheapest(FromCity, ToCity, Trip, Cost) :-
-    findall([Path, TripCost], trip_cost(FromCity, ToCity, [Path, TripCost]), Trips),
+    findall([Path, TripCost],
+    trip_cost(FromCity, ToCity, [Path, TripCost]), Trips),
     min_trip(Trips, [Trip, Cost]).
 
 % Shortest trip from city to city.
 shortest(FromCity, ToCity, Trip, Distance) :-
-    findall([Path, TripDistance], trip_dist(FromCity, ToCity, [Path, TripDistance]), Trips),
+    findall([Path, TripDistance],
+    trip_dist(FromCity, ToCity, [Path, TripDistance]), Trips),
     min_trip(Trips, [Trip, Distance]).
 
 
 % Fastest trip from city to city.
 fastest(FromCity, ToCity, Trip, Duration) :-
-    findall([Path, TripDuration], trip_time(FromCity, ToCity, [Path, TripDuration]), Trips),
+    findall([Path, TripDuration],
+    trip_time(FromCity, ToCity, [Path, TripDuration]), Trips),
     min_trip(Trips, [Trip, Duration]).
 
 % Task 1.9
-
-% Get all connections from airport X to country Y.
+% trip_to_nation(dublin, italy, T).
+% Get all connections from airport to country.
 trip_to_nation(FromCity, Country, Trip) :-
     list_airport(Country, Airports),
     member(ToCity, Airports),
     trip(FromCity, ToCity, Trip).
+
+
+ % Task 1.10
+ % Visited: List of cities already visited.
+find_trip_no_cycles(FromCity, ToCity, Visited, [FromCity, ToCity]) :-
+     flight(FromCity, ToCity, _, _, _, _),
+     \+ member(ToCity, Visited).
+
+find_trip_no_cycles(FromCity, ToCity, Visited, [FromCity | RestOfTrip]) :-
+    flight(FromCity, NextCity, _, _, _, _),
+    NextCity \= ToCity,
+    \+ member(NextCity, Visited),
+    find_trip_no_cycles(NextCity, ToCity, [NextCity | Visited], RestOfTrip).
+
+all_trip_to_nation(FromCity, Country, Trip) :-
+    list_airport(Country, Airports),
+    member(ToCity, Airports),
+    find_trip_no_cycles(FromCity, ToCity, [FromCity], Trip).
