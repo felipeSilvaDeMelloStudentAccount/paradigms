@@ -15,11 +15,33 @@ high_in_pile([_ | NextBlock], Block, AccumulateHeight, Height) :-
     CurrentHeight is AccumulateHeight + 1,
     high_in_pile(NextBlock, Block, CurrentHeight, Height).
 
-% Main predicate.
+% Find Hight.
 high([], _, _).
 high([Pile | NextPile], Block, Height) :-
-    % Find the block height in the pile.
+    % Find the high block in the pile.
     (high_in_pile(Pile, Block, 0, Height)
-    ; % If not found, Search in the rest of the piles.
+    ; % Search in the rest of the piles.
     high(NextPile, Block, Height)).
-    
+
+% Get block at a specified height.
+block_at_height(Pile, Height, Block) :-
+    block_at_height(Pile, Height, 0, Block).
+
+block_at_height([Block | _], TargetHeight, CurrentHeight, Block) :-
+    TargetHeight =:= CurrentHeight.
+
+block_at_height([_ | RestBlocks], TargetHeight, CurrentHeight, Block) :-
+    NextHeight is CurrentHeight + 1,
+    block_at_height(RestBlocks, TargetHeight, NextHeight, Block).
+
+block_at_height([], _, _, _) :- fail.
+
+% Get all blocks at the same height.
+all_same_height([], _, []).
+all_same_height([Pile | NextPile], Height, Blocks) :-
+    (
+        block_at_height(Pile, Height, Block)
+        ->  Blocks = [Block | RestBlocks]
+        ;   Blocks = RestBlocks
+    ),
+    all_same_height(NextPile, Height, RestBlocks).
