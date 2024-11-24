@@ -48,7 +48,7 @@ country(paris,france).
 country(newyork,usa).
 country(chicago,usa).
 
-% Task 1.1
+% Task 1
 % findall is taking three arguments there Airport, country(Airport, Country), Airports)
 % Airport is representing each result of the recursion
 % country(Airport, Country) is the query that we want to find all the solutions.
@@ -70,7 +70,7 @@ connections(City, Connections) :-
     toConnections(City, ToConnections),
     append(FromConnections, ToConnections, Connections).
 
-% Task 1.2
+% Task 2
 % Direct connection between two cities.
 trip(FromCity, ToCity) :-
     flight(FromCity, ToCity, _, _, _, _).
@@ -85,7 +85,7 @@ trip(FromCity, ToCity, Visited, [FromCity, ConnectionCity, ToCity]) :-
 trip(FromCity, ToCity, Path) :-
     trip(FromCity, ToCity, [FromCity], Path).
 
-% Task 1.3
+% Task 3
 % Find all routes from city to city.
 all_trip(FromCity, ToCity, Routes) :-
     findall(Path, trip(FromCity, ToCity, Path), Routes).
@@ -108,7 +108,7 @@ trip_dist(FromCity, ToCity, [Path, Distance]) :-
     trip(FromCity, ToCity, Path),
     trip_dist(Path, Distance).
 
-% Task 1.5
+% Task 5
 % Cost of a direct flight.
 direct_cost(FromCity, ToCity, Cost) :-
     flight(FromCity, ToCity, _, _, Cost, _).
@@ -125,7 +125,7 @@ trip_cost(FromCity, ToCity, [Path, Cost]) :-
     trip(FromCity, ToCity, Path),
     trip_cost(Path, Cost).
 
-% Task 1.6
+% Task 6
 % Calculate the length of a list.
 list_length([], 0).
 list_length([_|Tail], Length) :-
@@ -138,7 +138,7 @@ trip_change(FromCity, ToCity, [Path, Changes]) :-
     list_length(Path, PathLength),
     Changes is PathLength - 2.
 
-% Task 1.7 
+% Task 7
 % Get all trips from city to city, that does not contain the specified Airline.
 path_contains_airline([_], _) :- false.
 path_contains_airline([FromCity, ToCity | Rest], Airline) :-
@@ -157,7 +157,7 @@ all_trip_noairline(FromCity, ToCity, Airline, Result) :-
         Result
     ).
 
-% Task 1.8
+% Task 8
 % Trip Duration
 % Get the duration of a direct flight.
 direct_time(FromCity, ToCity, Duration) :-
@@ -201,7 +201,7 @@ fastest(FromCity, ToCity, Trip, Duration) :-
     trip_time(FromCity, ToCity, [Path, TripDuration]), Trips),
     min_trip(Trips, [Trip, Duration]).
 
-% Task 1.9
+% Task 9
 % trip_to_nation(dublin, italy, T).
 % Get all connections from airport to country.
 trip_to_nation(FromCity, Country, Trip) :-
@@ -210,7 +210,7 @@ trip_to_nation(FromCity, Country, Trip) :-
     trip(FromCity, ToCity, Trip).
 
 
- % Task 1.10
+ % Task 10
  % Visited: List of cities already visited.
 find_trip_no_cycles(FromCity, ToCity, Visited, [FromCity, ToCity]) :-
      flight(FromCity, ToCity, _, _, _, _),
