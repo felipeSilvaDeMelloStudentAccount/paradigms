@@ -45,3 +45,82 @@ all_same_height([Pile | NextPile], Height, Blocks) :-
         ;   Blocks = RestBlocks
     ),
     all_same_height(NextPile, Height, RestBlocks).
+
+
+% Move block
+% Update a stack at a specific index in the list of stacks
+update_stack_at_index([_|T], 1, NewElement, [NewElement|T]).
+update_stack_at_index([H|T], N, NewElement, [H|R]) :-
+    N > 1,
+    N1 is N - 1,
+    update_stack_at_index(T, N1, NewElement, R).
+
+% Print stacks in column format
+print_stacks(Stacks) :-
+    maplist(print_stack, Stacks).
+
+% Print a single stack with elements separated by bars
+print_stack([]) :-
+    write('| |\n'). % Empty stack representation
+print_stack(Stack) :-
+    write('|'),
+    maplist(write_element, Stack),
+    write('\n').
+
+% Print a single stack element with a bar
+write_element(Element) :-
+    write(Element),
+    write('|').
+
+% Print "before" and "after" stacks
+print_before_after(StacksBefore, StacksAfter) :-
+    write('Before:\n'),
+    print_stacks(StacksBefore),
+    write('After:\n'),
+    print_stacks(StacksAfter).
+
+% Check if an element is on top of a source stack
+check_element_on_top(SourceStack, Element, RestSource) :-
+    (append(RestSource, [Element], SourceStack) ->
+        true
+    ;
+        write('Error: Element is not on top of the source stack!\n'), fail
+    ).
+
+% Helper to retrieve the stack at a given index (1-based)
+get_stack_at_index(Index, Stacks, Stack) :-
+    nth1(Index, Stacks, Stack).
+
+% Move an element from one stack to another.
+moveblock(StacksBefore, StacksAfter, Element, SourceIndex, DestIndex) :-
+    % Get source and destination stacks
+    get_stack_at_index(SourceIndex, StacksBefore, SourceStack),
+    get_stack_at_index(DestIndex, StacksBefore, DestStack),
+
+    % Ensure the element is on top of the source stack (last element in list)
+    check_element_on_top(SourceStack, Element, RestSource),
+
+    % Append the element to the destination stack
+    append(DestStack, [Element], NewDestStack),
+
+    % Rebuild the stacks with updated Source and Destination
+    update_stack_at_index(StacksBefore, SourceIndex, RestSource, TempStacks),
+    update_stack_at_index(TempStacks, DestIndex, NewDestStack, StacksAfter),
+
+    % Print status before and after the move
+    print_before_after(StacksBefore, StacksAfter).
+
+moveblock(StacksBefore, Element, SourceIndex, DestIndex) :-
+    moveblock(StacksBefore, _, Element, SourceIndex, DestIndex).
+
+
+
+
+
+
+
+
+
+
+
+
