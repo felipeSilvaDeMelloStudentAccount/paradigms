@@ -1,3 +1,11 @@
+% Assignment 1 - Prolog Project - 25 Marks
+% Module: PROG9810:2024-25
+% Student Name: Felipe Silva de Mello
+% Student ID: D23125661
+% Email : D23125661@mytudublin.ie
+
+
+
 %flight (FromCity, ToCity, Airline, Distance, Duration,Cost)
 flight(london,dublin,aerlingus,500,45,150).
 flight(rome,london,ba,1500,150,400).
@@ -60,11 +68,11 @@ list_airport(Country, Airports) :-
 fromConnections(City, Connections) :-
     findall(Connection, flight(City, Connection,_,_,_,_),
     Connections).
-% Get all the incoming flights
+% All the incoming flights
 toConnections(City, Connections) :-
     findall(Connection, flight(Connection,City,_,_,_,_),
     Connections).
-% Get all outgoing and incoming flights
+% All outgoing and incoming flights
 connections(City, Connections) :-
     fromConnections(City,FromConnections),
     toConnections(City, ToConnections),
@@ -92,18 +100,18 @@ all_trip(FromCity, ToCity, Routes) :-
 
 
 % Task 1.4
-% Get the distance from city to city.
+% Distance from city to city.
 direct_distance(FromCity, ToCity, Distance) :-
     flight(FromCity, ToCity, _, Distance, _, _).
 
-% Get the total distance for a path.
+% Total distance for a path.
 trip_dist([_], 0).
 trip_dist([FromCity, ToCity | NextCity], Distance) :-
     direct_distance(FromCity, ToCity, D1),
     trip_dist([ToCity | NextCity], DNextCity),
     Distance is D1 + DNextCity.
 
-% Get the distance for each trip from from city to city.
+% Distance for each trip from from city to city.
 trip_dist(FromCity, ToCity, [Path, Distance]) :-
     trip(FromCity, ToCity, Path),
     trip_dist(Path, Distance).
@@ -126,26 +134,26 @@ trip_cost(FromCity, ToCity, [Path, Cost]) :-
     trip_cost(Path, Cost).
 
 % Task 6
-% Calculate the length of a list.
+% Length of a list.
 list_length([], 0).
 list_length([_|Tail], Length) :-
     list_length(Tail, TailLength),
     Length is TailLength + 1.
 
-% Total number of airplane changes for a trip.
+% Number of airplanes changes for a trip.
 trip_change(FromCity, ToCity, [Path, Changes]) :-
     trip(FromCity, ToCity, Path),
     list_length(Path, PathLength),
     Changes is PathLength - 2.
 
 % Task 7
-% Get all trips from city to city, that does not contain the specified Airline.
+% All trips from city to city, that does not contain the specified Airline.
 path_contains_airline([_], _) :- false.
 path_contains_airline([FromCity, ToCity | Rest], Airline) :-
     flight(FromCity, ToCity, Airline, _, _, _), !;  % Check if the flight is found.
     path_contains_airline([ToCity | Rest], Airline).  % continue checking.
 
-% Main - Find all trips from city to City, removing the specified Airline.
+% Main - Get all trips from city to City, removing the specified Airline.
 all_trip_noairline(FromCity, ToCity, Airline, Result) :-
     findall(
         Path,
@@ -159,7 +167,7 @@ all_trip_noairline(FromCity, ToCity, Airline, Result) :-
 
 % Task 8
 % Trip Duration
-% Get the duration of a direct flight.
+% Duration of a direct flight.
 direct_time(FromCity, ToCity, Duration) :-
     flight(FromCity, ToCity, _, _, Duration, _).
 
@@ -203,15 +211,15 @@ fastest(FromCity, ToCity, Trip, Duration) :-
 
 % Task 9
 % trip_to_nation(dublin, italy, T).
-% Get all connections from airport to country.
+% All connections from airport to country.
 trip_to_nation(FromCity, Country, Trip) :-
     list_airport(Country, Airports),
     member(ToCity, Airports),
     trip(FromCity, ToCity, Trip).
 
 
- % Task 10
- % Visited: List of cities already visited.
+% Task 10
+% Visited: List of cities already visited.
 find_trip_no_cycles(FromCity, ToCity, Visited, [FromCity, ToCity]) :-
      flight(FromCity, ToCity, _, _, _, _),
      \+ member(ToCity, Visited).
@@ -226,3 +234,144 @@ all_trip_to_nation(FromCity, Country, Trip) :-
     list_airport(Country, Airports),
     member(ToCity, Airports),
     find_trip_no_cycles(FromCity, ToCity, [FromCity], Trip).
+
+
+% ************************ PART 2 ************************ PART 2 ************************   %
+% Print a row
+print_row([]).
+print_row([Element]):- write('|'), write(Element), write('|').
+print_row([Element | NextElement]):- write('|'), write(Element), print_row(NextElement).
+
+% Print the blocks
+print_status([]).
+print_status([Row | NextRow]):- print_row(Row), nl, print_status(NextRow).
+
+
+
+% Find the block height in a pile.
+high_in_pile([Block | _], Block, AccumulateHeight, AccumulateHeight).
+high_in_pile([_ | NextBlock], Block, AccumulateHeight, Height) :-
+    CurrentHeight is AccumulateHeight + 1,
+    high_in_pile(NextBlock, Block, CurrentHeight, Height).
+
+% Find Hight.
+high([], _, _).
+high([Pile | NextPile], Block, Height) :-
+    % Find the high block in the pile.
+    (high_in_pile(Pile, Block, 0, Height)
+    ; % Search in the rest of the piles.
+    high(NextPile, Block, Height)).
+
+block_at_height(Pile, Height, Block) :-
+    block_at_height(Pile, Height, 0, Block).
+
+block_at_height([Block | _], TargetHeight, CurrentHeight, Block) :-
+    TargetHeight =:= CurrentHeight.
+
+block_at_height([_ | RestBlocks], TargetHeight, CurrentHeight, Block) :-
+    NextHeight is CurrentHeight + 1,
+    block_at_height(RestBlocks, TargetHeight, NextHeight, Block).
+
+block_at_height([], _, _, _) :- fail.
+
+% All blocks at the same height.
+all_same_height([], _, []).
+all_same_height([Pile | NextPile], Height, Blocks) :-
+    (
+        block_at_height(Pile, Height, Block)
+        ->  Blocks = [Block | RestBlocks]
+        ;   Blocks = RestBlocks
+    ),
+    all_same_height(NextPile, Height, RestBlocks).
+
+
+% Move block
+% Update a stack at a specific index in the list of stacks
+update_stack_at_index([_|T], 1, NewElement, [NewElement|T]).
+update_stack_at_index([H|T], N, NewElement, [H|R]) :-
+    N > 1,
+    N1 is N - 1,
+    update_stack_at_index(T, N1, NewElement, R).
+
+% Print stacks in column format
+print_stacks(Stacks) :-
+    maplist(print_stack, Stacks).
+
+% Print a single stack with elements separated by bars
+print_stack([]) :-
+    write('| |\n'). % Empty stack representation
+print_stack(Stack) :-
+    write('|'),
+    maplist(write_element, Stack),
+    write('\n').
+
+% Print a single stack element with a bar
+write_element(Element) :-
+    write(Element),
+    write('|').
+
+% Print "before" and "after" stacks
+print_before_after(StacksBefore, StacksAfter) :-
+    write('Before:\n'),
+    print_stacks(StacksBefore),
+    write('After:\n'),
+    print_stacks(StacksAfter).
+
+% Check if an element is on top of a source stack
+check_element_on_top(SourceStack, Element, RestSource) :-
+    (append(RestSource, [Element], SourceStack) ->
+        true
+    ;
+        write('Error: Element is not on top of the source stack!\n'), fail
+    ).
+
+% Helper to retrieve the stack at a given index (1-based)
+get_stack_at_index(Index, Stacks, Stack) :-
+    nth1(Index, Stacks, Stack).
+
+% Move an element from one stack to another.
+moveblock(StacksBefore, StacksAfter, Element, SourceIndex, DestIndex) :-
+    % Get source and destination stacks
+    get_stack_at_index(SourceIndex, StacksBefore, SourceStack),
+    get_stack_at_index(DestIndex, StacksBefore, DestStack),
+
+    check_element_on_top(SourceStack, Element, RestSource),
+
+    append(DestStack, [Element], NewDestStack),
+
+    % Rebuild the stacks with updated Source and Destination
+    update_stack_at_index(StacksBefore, SourceIndex, RestSource, TempStacks),
+    update_stack_at_index(TempStacks, DestIndex, NewDestStack, StacksAfter),
+
+    % Print before and after the move
+    print_before_after(StacksBefore, StacksAfter).
+
+moveblock(StacksBefore, Element, SourceIndex, DestIndex) :-
+    moveblock(StacksBefore, _, Element, SourceIndex, DestIndex).
+
+% ************************ PART 3 ************************ PART 3 ************************   %
+generate_moves(0, []).
+generate_moves(MoveCount, [move|RemainingMoves]) :-
+    MoveCount > 0,
+    RemainingMovesCount is MoveCount - 1,
+    generate_moves(RemainingMovesCount, RemainingMoves).
+
+split_sorted_elements(SortedElements, Count, Front, Back) :-
+    length(Front, Count),
+    append(Front, Back, SortedElements).
+
+redistribute_elements([], [], [], []).
+redistribute_elements(SortedElements, [OriginalStack|RemainingOriginalStacks],
+                      [RedistributedStack|RemainingRedistributedStacks], Moves) :-
+    length(OriginalStack, StackSize),
+    split_sorted_elements(SortedElements, StackSize, RedistributedStack, RemainingElements),
+    redistribute_elements(RemainingElements, RemainingOriginalStacks,
+                          RemainingRedistributedStacks, RemainingMoves),
+    generate_moves(StackSize, CurrentMoves),
+    append(CurrentMoves, RemainingMoves, Moves).
+% Order Blocks
+order_blocks(Stacks, SortedStacks, NumberOfMoves) :-
+    flatten(Stacks, CombinedElements),
+    sort(CombinedElements, SortedElements),
+    redistribute_elements(SortedElements, Stacks, SortedStacks, Moves),
+    length(Moves, NumberOfMoves).
